@@ -1,0 +1,51 @@
+@startuml
+skinparam handwritten true
+hide circle
+skinparam linetype ortho
+
+entity "users" as users {
+  * id : bigint <<PK>>
+  --
+  name : varchar
+  email : varchar
+  password : varchar
+  role : enum('admin','guru','siswa')
+}
+
+entity "siswas" as siswas {
+  * id : bigint <<PK>>
+  --
+  nis : varchar <<UK>>
+  nama : varchar
+  kelas : varchar
+  user_id : bigint <<FK>>
+}
+
+entity "gurus" as gurus {
+  * id : bigint <<PK>>
+  --
+  kode_guru : varchar <<UK>>
+  nama : varchar
+  mata_pelajaran : varchar
+  user_id : bigint <<FK>>
+}
+
+entity "nilais" as nilais {
+  * id : bigint <<PK>>
+  --
+  siswa_id : bigint <<FK>>
+  guru_id : bigint <<FK>>
+  mata_pelajaran : varchar
+  nilai_tugas : decimal(5,2)
+  nilai_uts : decimal(5,2)
+  nilai_uas : decimal(5,2)
+  nilai_akhir : decimal(5,2)
+  status : enum('Lulus','Tidak Lulus')
+}
+
+users ||--o| siswas : "One to One"
+users ||--o| gurus : "One to One"
+siswas ||--o{ nilais : "One to Many"
+gurus ||--o{ nilais : "One to Many"
+
+@enduml

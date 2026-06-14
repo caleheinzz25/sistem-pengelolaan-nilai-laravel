@@ -1,0 +1,27 @@
+@startuml
+skinparam handwritten true
+left to right direction
+
+actor "Admin" as admin
+actor "Guru" as guru
+actor "Siswa" as siswa
+
+rectangle "Sistem Pengelolaan Nilai" {
+  usecase "Kelola Data Master (User, Kelas, Mapel)" as UC1
+  usecase "Input dan Kelola Nilai" as UC2
+  usecase "Lihat Nilai / Rapor" as UC3
+  usecase "Cetak Rapor" as UC4
+  usecase "Login / Logout" as UC0
+}
+
+admin --> UC0
+guru --> UC0
+siswa --> UC0
+
+admin --> UC1
+guru --> UC2
+siswa --> UC3
+siswa --> UC4
+guru --> UC4
+
+@enduml

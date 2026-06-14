@@ -1,0 +1,181 @@
+\documentclass[12pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=4
+}
+\lstset{style=mystyle}
+
+\title{\textbf{DOKUMEN IMPLEMENTASI PROGRAM\\ Sistem Pengelolaan Nilai Akademik}}
+\author{Dokumentasi Proyek}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Pendahuluan}
+Dokumen ini merupakan laporan dari tahap \textbf{Implementasi Program} untuk Sistem Pengelolaan Nilai. Implementasi dibangun menggunakan bahasa pemrograman \textbf{PHP} dengan *framework* \textbf{Laravel}. Laporan ini menjabarkan pemetaan relasional, antarmuka fungsional, pencatatan *error*, dan pengaplikasian prinsip penulisan kode terstruktur serta berorientasi objek (OOP).
+
+\section{Antarmuka dan Fungsionalitas Sistem}
+
+\subsection{1. Halaman Login Berdasarkan Role}
+Implementasi otentikasi login mendayagunakan kontrol kelas akses (*Authentication controller*) dan *Middleware* dengan pencabangan logika *enum* \texttt{role} pada tabel \texttt{users}. Setelah kredensial (*email* dan *password*) tervalidasi, sesi aplikasi mengatur arahan (*redirect*):
+\begin{itemize}
+    \item Administrator masuk ke dasbor \texttt{/admin/dashboard}.
+    \item Guru diarahkan ke rute \texttt{/guru/dashboard} untuk operasi kelas harian.
+    \item Siswa diarahkan ke \texttt{/siswa/dashboard} untuk meninjau rapor secara pasif.
+\end{itemize}
+
+\subsection{2. Form Input Data Siswa dan Nilai}
+Halaman ini melayani fungsi CRUD melalui rute \texttt{/guru/input-nilai}. Dirancang menggunakan kerangka HTML berbalut kelas utilitas *TailwindCSS*. Form memuat *dropdown* \textit{Siswa} (\texttt{siswa\_id}), kolom *Mata Pelajaran*, dan tiga input desimal: Nilai Tugas, UTS, dan UAS. *Method action* diarahkan menuju ke \texttt{GuruController@storeNilai}.
+
+\subsection{3. Proses Perhitungan Nilai Akhir}
+Proses kalkulasi telah diabstraksi langsung ke dalam kelas Model \texttt{Nilai} untuk menghindari *Fat Controllers*. 
+\begin{center}
+\texttt{Nilai Akhir = (Tugas) + (UTS) + (UAS) / Total Rasio (diatur di logic method)}
+\end{center}
+Selain kalkulasi numerik desimal \texttt{5,2}, sistem juga memiliki prosedur \texttt{tentukanStatus()} yang mengatur atribut \texttt{status} menjadi \texttt{'Lulus'} atau \texttt{'Tidak Lulus'} secara otomatis sebelum tersimpan permanen di *database*.
+
+\subsection{4. Laporan Hasil Nilai Siswa}
+Dihasilkan melalui rute pencetakan (\texttt{/laporan/print}). Modul ini meng-kueri nilai berdasarkan identifikasi unik siswa (\texttt{nis}), dirender secara dinamis melalui mesin *Blade template* menjadi struktur laporan (Rapor), dan dapat dikonversi menjadi berkas PDF *offline*.
+
+\section{Bukti Pengujian Database}
+Pengujian ke \textit{database} MySQL dilakukan melalui eksekusi berkas migrasi (\textit{Migration Classes}). 
+\begin{itemize}
+    \item \textbf{Status Koneksi}: \textbf{SUKSES} (PDO tervalidasi stabil tanpa hambatan soket).
+    \item \textbf{Bukti Tercipta Tabel:} Tersedia skema asli: \texttt{users}, \texttt{siswas}, \texttt{gurus}, dan \texttt{nilais}.
+    \item Relasi (*Foreign Keys*), seperti penghapusan mengkaskade (\textit{cascade on delete}) untuk relasi \texttt{nilais.siswa\_id -> siswas.id}, berhasil terdefinisi utuh.
+\end{itemize}
+
+\section{Catatan Error (Debugging) \& Perbaikan}
+
+\subsection{Error 1: \texttt{QueryException} pada Relasi Pengguna}
+\textbf{Skenario:} Terjadi eror konstrain SQL (*foreign key constraint violation*) saat mencoba menghapus seorang pengguna (\texttt{user}) yang sedang terhubung dengan tabel data siswa. \\
+\textbf{Perbaikan:} Memperbarui fail migrasi *schema* dengan menyisipkan aturan *constraint* yang lebih aman, misalnya \texttt{->nullOnDelete()} untuk rujukan \texttt{user\_id} pada tabel \texttt{siswas} dan \texttt{gurus}.
+\begin{lstlisting}[language=PHP]
+// Perbaikan pada Migrasi
+$table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
+\end{lstlisting}
+
+\subsection{Error 2: Kalkulasi Status Tertinggal}
+\textbf{Skenario:} Form guru hanya mengirim parameter Tugas, UTS, UAS. Nilai Akhir serta Status tidak ikut terisi ke *database* walau *store method* telah diaktifkan, memicu status \textit{null} atau \textit{0}. \\
+\textbf{Perbaikan:} Memanfaatkan \textit{bootable saving model events} pada kelas OOP \texttt{Nilai} agar kedua nilai dikalkulasi mandiri persis sebelum penyimpanan DB dieksekusi.
+\begin{lstlisting}[language=PHP]
+// Pada model Nilai.php
+protected static function booted(): void {
+    static::saving(function (Nilai $nilai) {
+        $nilai->nilai_akhir = $nilai->hitungNilaiAkhir();
+        $nilai->status = $nilai->tentukanStatus();
+    });
+}
+\end{lstlisting}
+
+\section{Potongan Kode: Pemrograman Terstruktur \& OOP}
+
+Sistem ini menunjukkan kapabilitas \textit{Object-Oriented Programming} yang rapi sesuai panduan internal proyek (*project architecture*):
+
+\textbf{1. Implementasi Kelas Objek (\textit{Model}) \& Fungsi Terstruktur Internal}
+Metode berikut membuktikan implementasi fungsi/prosedur yang membedah properti objek ke dalam *output* yang terstruktur.
+\begin{lstlisting}[language=PHP]
+<?php
+namespace App\Models;
+use Illuminate\Database\Eloquent\Model;
+
+class Nilai extends Model
+{
+    // Fungsi prosedural / kalkulasi bisnis
+    public function hitungNilaiAkhir(): float
+    {
+        // Contoh algoritma rasio rata-rata 33% 
+        return round(($this->nilai_tugas + $this->nilai_uts + $this->nilai_uas) / 3, 2);
+    }
+
+    // Fungsi prosedural / klasifikasi kondisional
+    public function tentukanStatus(): string
+    {
+        return $this->hitungNilaiAkhir() >= 75 ? 'Lulus' : 'Tidak Lulus';
+    }
+}
+\end{lstlisting}
+
+\textbf{2. Implementasi pada Kelas \textit{Controller}}
+Implementasi struktur MVC Controller menangani validasi, otorisasi, dan perutean tanggapan (*response routing*).
+\begin{lstlisting}[language=PHP]
+<?php
+namespace App\Http\Controllers;
+use App\Models\Nilai;
+use Illuminate\Http\Request;
+
+class GuruController extends Controller
+{
+    // Method kelas untuk menyimpan data masukan guru
+    public function storeNilai(Request $request)
+    {
+        $validatedData = $request->validate([
+            'siswa_id' => 'required|exists:siswas,id',
+            'mata_pelajaran' => 'required|string|max:255',
+            'nilai_tugas' => 'required|numeric|min:0|max:100',
+            'nilai_uts' => 'required|numeric|min:0|max:100',
+            'nilai_uas' => 'required|numeric|min:0|max:100',
+        ]);
+        
+        $nilai = new Nilai();
+        $nilai->fill($validatedData);
+        $nilai->guru_id = auth()->user()->guru->id;
+        $nilai->save(); // Method saving otomatis menghitung nilai akhir & status (Event Hook)
+        
+        return redirect()->route('guru.rekap')->with('success', 'Nilai tersimpan.');
+    }
+}
+\end{lstlisting}
+
+\section{Pemanfaatan Library dan Komponen}
+Aplikasi ini ditunjang dengan komponen standar:
+\begin{enumerate}
+    \item \textbf{Laravel 11.x:} Inti *framework* PHP moderen yang mendukung ekosistem MVC secara penuh dan aman (proteksi CSRF terintegrasi).
+    \item \textbf{Tailwind CSS:} Paket kompiler kelas bergaya atomik (\textit{utility-first CSS}) yang memodernisasi desain tata letak UI tanpa harus menulis kustomisasi kode CSS secara masif.
+    \item \textbf{Eloquent ORM:} Lapisan pemetaan relasional bawaan Laravel yang memungkinkan interaksi *database* secara *fluent* dan objektif tanpa instruksi sintaks SQL manual.
+\end{enumerate}
+
+\section{Penjelasan Coding Guidelines dan Best Practices}
+Sistem Pengelolaan Nilai diprogram berdasarkan standar emas industri kode program:
+\begin{itemize}
+    \item \textbf{Fat Models, Skinny Controllers:} Kontroler seperti \texttt{GuruController} dipertahankan ringkas. Segala rumusan bisnis (\texttt{hitungNilaiAkhir()}) dipindahkan langsung ke berkas representasi Model \texttt{Nilai}.
+    \item \textbf{Penggunaan Model Event Observers:} Memanfaatkan pemicu kejadian sistematis (\texttt{static::saving}) ketimbang harus memanggil secara manual formula perhitungan tiap kali kontroler melakukan simpan (*DRY principle - Don't Repeat Yourself*).
+    \item \textbf{Penamaan Metrik Kaku (Convention over Configuration):} Format penamaan singular pada Model (\texttt{Siswa}, \texttt{Guru}), dan format *plural* pada *database migrations* (\texttt{siswas}, \texttt{gurus}) dilakukan secara konsisten agar Eloquent dapat menterjemahkannya secara sihir (*magically resolved*).
+\end{itemize}
+
+\end{document}

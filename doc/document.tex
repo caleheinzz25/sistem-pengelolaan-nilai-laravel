@@ -1,0 +1,159 @@
+\documentclass[12pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{titlesec}
+\usepackage{enumitem}
+
+\title{\textbf{DOKUMEN ANALISIS DAN PERANCANGAN SISTEM\\ Sistem Pengelolaan Nilai Akademik}}
+\author{Dokumentasi Proyek}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Pendahuluan}
+Dokumen ini berisi analisis dan perancangan untuk \textbf{Sistem Pengelolaan Nilai}. Sistem ini dirancang untuk memfasilitasi pengelolaan nilai siswa secara digital, transparan, dan efisien bagi sekolah, serta dibangun dengan menggunakan pendekatan pemrograman terstruktur dan \textit{Object-Oriented Programming (OOP)} pada *framework* Laravel.
+
+\section{Tujuan Sistem}
+Tujuan utama dari sistem pengelolaan nilai ini adalah:
+\begin{itemize}
+    \item Mendigitalisasi proses input dan rekapitulasi nilai siswa dari sistem manual menjadi terkomputerisasi.
+    \item Memudahkan guru dalam memasukkan, mengedit, dan mengelola komponen nilai (Tugas, UTS, UAS).
+    \item Memberikan transparansi kepada siswa untuk melihat hasil evaluasi akademik serta status kelulusan (Lulus/Tidak Lulus).
+    \item Menghindari kehilangan data nilai melalui penyimpanan \textit{database} relasional yang aman.
+\end{itemize}
+
+\section{Analisis Kebutuhan Pengguna}
+Berdasarkan studi kasus, terdapat tiga aktor utama dalam sistem:
+\begin{enumerate}
+    \item \textbf{Admin:} Membutuhkan antarmuka untuk mengelola pengguna (User) dan data referensi sistem.
+    \item \textbf{Guru:} Membutuhkan fitur untuk mencatatkan nilai tugas, UTS, dan UAS terhadap siswa berdasarkan mata pelajaran yang diampu.
+    \item \textbf{Siswa:} Membutuhkan halaman informasi atau rapor yang menampilkan rekapitulasi nilai mereka beserta status akhir.
+\end{enumerate}
+
+\section{Fungsi Utama Sistem}
+Fungsi esensial yang harus ada pada sistem ini meliputi:
+\begin{itemize}
+    \item \textbf{Manajemen Autentikasi:} Mekanisme *Login/Logout* dengan perutean berbasis peran (Admin, Guru, Siswa).
+    \item \textbf{Manajemen Data Master:} Sinkronisasi tabel profil guru dan profil siswa yang merujuk pada kredensial akun pengguna (*User Account*).
+    \item \textbf{Manajemen Nilai:} Kalkulasi otomatis Nilai Akhir (Tugas, UTS, UAS) dan penentuan status kelulusan.
+    \item \textbf{Pelaporan (Reporting):} Rekapitulasi nilai dan laporan PDF (Cetak Rapor).
+\end{itemize}
+
+\section{Spesifikasi Fungsional dan Non-Fungsional}
+\subsection{Spesifikasi Fungsional}
+\begin{itemize}
+    \item Sistem dapat mengautentikasi pengguna dan menyimpan sesi (*session*) dengan aman.
+    \item Sistem dapat memproses input tiga jenis nilai: \texttt{nilai\_tugas}, \texttt{nilai\_uts}, dan \texttt{nilai\_uas}.
+    \item Sistem dapat menghitung \texttt{nilai\_akhir} berdasarkan bobot yang ditentukan.
+    \item Sistem dapat mengekspor rekap nilai dalam bentuk PDF.
+\end{itemize}
+
+\subsection{Spesifikasi Non-Fungsional}
+\begin{itemize}
+    \item \textbf{Kinerja:} Kueri *database* dieksekusi secara optimal untuk mempercepat *loading* halaman.
+    \item \textbf{Keamanan:} Sandi pengguna (Password) wajib di-\textit{hash} menggunakan fungsi \textit{Bcrypt}.
+    \item \textbf{Antarmuka:} Bersifat responsif (*mobile-friendly*) dengan balutan *framework* CSS modern.
+\end{itemize}
+
+\section{Alur Kerja Sistem (Workflow)}
+\begin{enumerate}
+    \item Pengguna (\textit{Admin}, \textit{Guru}, atau \textit{Siswa}) melakukan masuk log (\textit{Login}).
+    \item Guru memilih menu Input Nilai, memilih Siswa, lalu memasukkan Nilai Tugas, UTS, dan UAS untuk Mata Pelajaran tertentu.
+    \item Sistem secara otomatis memanggil fungsi kalkulasi untuk mengisi kolom \textit{Nilai Akhir} dan \textit{Status}.
+    \item Siswa login, mengakses dasbor nilai, lalu sistem menyajikan tabel capaian studinya.
+\end{enumerate}
+
+\section{Unified Modeling Language (UML) Sistem}
+Diagram Use Case di bawah merepresentasikan secara visual fungsionalitas dan interaksi aktor.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{diagram.png}
+    \caption{Diagram Use Case Sistem Pengelolaan Nilai}
+    \label{fig:usecase}
+\end{figure}
+
+\section{Rancangan Antarmuka (UI)}
+Rancangan UI berfokus pada kemudahan pengguna (\textit{User Friendly}):
+\begin{itemize}
+    \item \textbf{Halaman Login:} Menangani autentikasi dengan \textit{form} input standar.
+    \item \textbf{Dashboard (Admin/Guru/Siswa):} Berisi panel statistik, ringkasan, atau selamat datang (*Welcome Screen*).
+    \item \textbf{Form Input Nilai (Guru):} *View Blade* yang berisi kotak masukan (\textit{input textbox}) untuk mencatat poin tugas, UTS, dan UAS.
+    \item \textbf{Halaman Laporan (Siswa):} *Grid* tabel nilai yang dapat dicetak menjadi lampiran fisik (PDF).
+\end{itemize}
+
+\section{Rancangan Database (ERD)}
+Struktur relasional \textit{database} dirancang sesuai dengan migrasi Laravel terbaru proyek ini.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{erd.png}
+    \caption{Entity Relationship Diagram (ERD)}
+    \label{fig:erd}
+\end{figure}
+
+Keterangan struktur tabel aktual:
+\begin{itemize}
+    \item \textbf{users:} Mengelola hak akses dan kata sandi dengan atribut \texttt{role} berjenis \texttt{enum('admin', 'guru', 'siswa')}.
+    \item \textbf{siswas:} Menampung identitas unik siswa (\texttt{nis, nama, kelas}) dan berelasi One-to-One dengan tabel \texttt{users}.
+    \item \textbf{gurus:} Menampung identitas pengajar (\texttt{kode\_guru, nama, mata\_pelajaran}) dan berelasi One-to-One dengan tabel \texttt{users}.
+    \item \textbf{nilais:} Tabel transaksional. Berisi \textit{Foreign Key} (\texttt{siswa\_id, guru\_id}), kolom subjek (\texttt{mata\_pelajaran}), skor per komponen (\texttt{nilai\_tugas, nilai\_uts, nilai\_uas, nilai\_akhir}), dan predikat capaian (\texttt{status}).
+\end{itemize}
+
+\section{Batasan Sistem}
+Untuk menjaga fokus aplikasi, batasan ruang lingkupnya adalah:
+\begin{itemize}
+    \item Sistem tidak mencakup pendaftaran Penerimaan Peserta Didik Baru (PPDB).
+    \item Tidak memiliki integrasi pembayaran (*Payment Gateway*).
+\end{itemize}
+
+\section{Rancangan Pemrograman \& Status Database}
+
+\subsection{Koneksi Database Berhasil}
+\textbf{Status Koneksi Database: BERHASIL.} \\
+Aplikasi telah terhubung dengan \textit{database} MySQL. Migrasi skema (*schema migrations*) untuk tabel \texttt{users}, \texttt{siswas}, \texttt{gurus}, dan \texttt{nilais} telah dieksekusi sempurna pada mesin lokal tanpa galat koneksi basis data.
+
+\subsection{Rancangan Fungsi / Prosedur (Implementasi Pemrograman Terstruktur)}
+Sistem ini menggunakan minimal \textbf{3 fungsi terstruktur / blok operasional} independen:
+\begin{enumerate}
+    \item \textbf{Fungsi Kalkulasi \texttt{hitungNilaiAkhir(\$tugas, \$uts, \$uas)}} \\
+    \textit{Logika:} Menyatukan rasio bobot persentase dari parameter yang dimasukkan, misalnya \texttt{(30\% * Tugas) + (30\% * UTS) + (40\% * UAS)} untuk menghasilkan desimal (*float*) nilai akhir murni.
+
+    \item \textbf{Fungsi Penentuan Status \texttt{tentukanStatus(\$nilaiAkhir)}} \\
+    \textit{Logika:} Prosedur pengkondisian IF-ELSE. Jika variabel \texttt{\$nilaiAkhir >= 75}, prosedural ini akan membalikkan parameter konstan \textit{String} \texttt{"Lulus"}. Apabila di bawah 75, maka \texttt{"Tidak Lulus"}.
+
+    \item \textbf{Fungsi Agregasi Rekap \texttt{hitungRataRataKelas(\$koleksiNilai)}} \\
+    \textit{Logika:} Melakukan iterasi *looping* (misalnya \texttt{foreach} atau \texttt{array\_reduce}) pada kumpulan (koleksi) model nilai, dan menjumlahkannya lalu membaginya dengan total pencacah (*counter*).
+\end{enumerate}
+
+\subsection{Rancangan Class / Method (Implementasi OOP)}
+Implementasi *Object-Oriented Programming* ditunjukkan kuat pada lapisan *Model* dan *Controller*:
+
+\begin{enumerate}
+    \item \textbf{Class \texttt{Nilai} (Model)}
+    \begin{itemize}
+        \item \textbf{\texttt{public function hitungNilaiAkhir()}}: \\
+        \textit{Method OOP internal} yang diaktifkan (*triggered*) melalui \textit{booted lifecycle hook} (seperti \texttt{static::saving}) pada model Laravel. Mengambil properti di dalam objek (\texttt{\$this->nilai\_tugas}, dsb) tanpa harus menerima parameter eksternal.
+        \item \textbf{\texttt{public function tentukanStatus()}}: \\
+        \textit{Method} utilitas spesifik objek \texttt{Nilai}. Mengotomatisasi pembaruan nilai kolom properti \texttt{status} ke 'Lulus' atau 'Tidak Lulus' sebelum kueri SQL INSERT dijalankan.
+    \end{itemize}
+
+    \item \textbf{Class \texttt{GuruController} (Controller)}
+    \begin{itemize}
+        \item \textbf{\texttt{public function storeNilai(Request \$request)}}: \\
+        \textit{Method} ini bertugas menangkap *payload* data *request*, memvalidasinya, kemudian memanggil metode penyimpanan *Object-Relational Mapping* (ORM) ke \textit{database}. Mengembalikan sinyal \textit{RedirectResponse} atau \textit{JsonResponse}.
+        \item \textbf{\texttt{public function dashboard()}}: \\
+        \textit{Method} ini merangkum data kontekstual untuk peran Guru, lalu merendernya dengan *layout engine* \textit{Blade View} Laravel.
+    \end{itemize}
+\end{enumerate}
+
+\end{document}
