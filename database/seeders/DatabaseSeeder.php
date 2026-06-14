@@ -9,6 +9,8 @@ use App\Models\Siswa;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -19,115 +21,169 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // --- Admin ---
-        User::factory()->create([
+        $password = Hash::make('password');
+        $now = now();
+
+        // ============================================================
+        // ADMIN
+        // ============================================================
+        User::insert([
             'name' => 'Admin Sekolah',
             'email' => 'admin@sekolah.test',
             'role' => 'admin',
+            'email_verified_at' => $now,
+            'password' => $password,
+            'remember_token' => Str::random(10),
+            'created_at' => $now,
+            'updated_at' => $now,
         ]);
 
-        // --- Guru (3 orang) ---
+        // ============================================================
+        // GURU (6 orang)
+        // ============================================================
         $guruData = [
-            ['nama' => 'Budi Santoso, S.Pd.', 'kode_guru' => 'GRU-00001', 'mata_pelajaran' => 'Matematika'],
-            ['nama' => 'Ani Rahmawati, S.Pd.', 'kode_guru' => 'GRU-00002', 'mata_pelajaran' => 'Bahasa Indonesia'],
-            ['nama' => 'Dedi Kurniawan, M.Pd.', 'kode_guru' => 'GRU-00003', 'mata_pelajaran' => 'Bahasa Inggris'],
+            ['nama' => 'Budi Santoso, S.Pd.', 'kode_guru' => 'GRU-00001', 'mata_pelajaran' => 'Matematika', 'email' => 'budisantoso@sekolah.test'],
+            ['nama' => 'Ani Rahmawati, S.Pd.', 'kode_guru' => 'GRU-00002', 'mata_pelajaran' => 'Bahasa Indonesia', 'email' => 'anirahmawati@sekolah.test'],
+            ['nama' => 'Dedi Kurniawan, M.Pd.', 'kode_guru' => 'GRU-00003', 'mata_pelajaran' => 'Bahasa Inggris', 'email' => 'dedikurniawan@sekolah.test'],
+            ['nama' => 'Siti Aminah, S.Pd.', 'kode_guru' => 'GRU-00004', 'mata_pelajaran' => 'Fisika', 'email' => 'sitiaminah@sekolah.test'],
+            ['nama' => 'Ahmad Fauzi, M.Pd.', 'kode_guru' => 'GRU-00005', 'mata_pelajaran' => 'Kimia', 'email' => 'ahmadfauzi@sekolah.test'],
+            ['nama' => 'Rina Wulandari, S.Pd.', 'kode_guru' => 'GRU-00006', 'mata_pelajaran' => 'Biologi', 'email' => 'rinawulandari@sekolah.test'],
         ];
 
-        $gurus = [];
+        $guruIds = [];
         foreach ($guruData as $data) {
-            $user = User::factory()->create([
+            $userId = User::insertGetId([
                 'name' => $data['nama'],
-                'email' => str_replace([' ', ',', '.'], '', strtolower(explode(',', $data['nama'])[0])).'@sekolah.test',
+                'email' => $data['email'],
                 'role' => 'guru',
+                'email_verified_at' => $now,
+                'password' => $password,
+                'remember_token' => Str::random(10),
+                'created_at' => $now,
+                'updated_at' => $now,
             ]);
 
-            $gurus[] = Guru::factory()->create([
+            $guruIds[] = Guru::insertGetId([
+                'user_id' => $userId,
                 'nama' => $data['nama'],
                 'kode_guru' => $data['kode_guru'],
                 'mata_pelajaran' => $data['mata_pelajaran'],
-                'user_id' => $user->id,
+                'created_at' => $now,
+                'updated_at' => $now,
             ]);
         }
 
-        // --- Siswa (10 orang) ---
-        $siswaNama = [
-            'Andi Prasetyo', 'Bunga Citra Lestari', 'Candra Wijaya',
-            'Dewi Sartika', 'Eko Nugroho', 'Fitri Handayani',
-            'Gilang Ramadhan', 'Hana Permata', 'Irfan Hakim',
-            'Jasmine Azzahra',
+        // ============================================================
+        // SISWA (300 orang)
+        // ============================================================
+        $jumlahSiswa = 300;
+        $kelasList = ['X IPA 1', 'X IPA 2', 'X IPS 1', 'X IPS 2', 'XI IPA 1', 'XI IPA 2', 'XI IPS 1', 'XI IPS 2', 'XII IPA 1', 'XII IPA 2', 'XII IPS 1', 'XII IPS 2'];
+
+        // User untuk siswa pertama (Andi Prasetyo) — akun demo
+        $siswaUsers = [
+            [
+                'name' => 'Andi Prasetyo',
+                'email' => 'andi@siswa.test',
+                'role' => 'siswa',
+                'email_verified_at' => $now,
+                'password' => $password,
+                'remember_token' => Str::random(10),
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
         ];
 
-        $siswas = [];
-        foreach ($siswaNama as $i => $nama) {
-            $kelas = ['X IPA 1', 'X IPS 1', 'XI IPA 1', 'XI IPS 1', 'XII IPA 1', 'XII IPS 1'][$i % 6];
-
-            $user = User::factory()->create([
-                'name' => $nama,
-                'email' => str_replace(' ', '', strtolower(explode(' ', $nama)[0])).'@siswa.test',
+        // Generate 299 user siswa lainnya
+        for ($i = 2; $i <= $jumlahSiswa; $i++) {
+            $siswaUsers[] = [
+                'name' => fake()->name(),
+                'email' => 'siswa'.str_pad((string) $i, 3, '0', STR_PAD_LEFT).'@siswa.test',
                 'role' => 'siswa',
-            ]);
-
-            $siswas[] = Siswa::factory()->create([
-                'nis' => 'NIS-'.str_pad((string) ($i + 1), 5, '0', STR_PAD_LEFT),
-                'nama' => $nama,
-                'kelas' => $kelas,
-                'user_id' => $user->id,
-            ]);
+                'email_verified_at' => $now,
+                'password' => $password,
+                'remember_token' => Str::random(10),
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
         }
 
-        // --- Nilai untuk setiap siswa di 3 mata pelajaran ---
-        // Because WithoutModelEvents is used, nilai_akhir dan status
-        // dihitung secara eksplisit menggunakan NilaiHelper.
-        foreach ($siswas as $index => $siswa) {
-            $base = 50 + ($index * 5); // 50, 55, 60, ..., 95
+        User::insert($siswaUsers);
 
-            $tugas = min($base, 100);
-            $uts = min($base + 5, 100);
-            $uas = max(min($base - 5, 100), 40);
-            $na = NilaiHelper::hitungNilaiAkhir($tugas, $uts, $uas);
+        // Ambil ID user siswa yang baru dibuat
+        $siswaUserIds = User::where('role', 'siswa')
+            ->orderBy('id')
+            ->pluck('id')
+            ->toArray();
 
-            Nilai::create([
-                'siswa_id' => $siswa->id,
-                'guru_id' => $gurus[0]->id,
-                'mata_pelajaran' => 'Matematika',
-                'nilai_tugas' => $tugas,
-                'nilai_uts' => $uts,
-                'nilai_uas' => $uas,
-                'nilai_akhir' => $na,
-                'status' => NilaiHelper::tentukanStatusKelulusan($na),
-            ]);
+        // Generate record siswa
+        $siswaRecords = [];
+        $namaDepan = ['Andi', 'Bunga', 'Candra', 'Dewi', 'Eko', 'Fitri', 'Gilang', 'Hana', 'Irfan', 'Jasmine'];
+        foreach ($siswaUserIds as $index => $userId) {
+            $i = $index + 1;
 
-            $tugas2 = min(55 + ($index * 4), 100);
-            $uts2 = min(58 + ($index * 4), 100);
-            $uas2 = max(min(52 + ($index * 4), 100), 40);
-            $na2 = NilaiHelper::hitungNilaiAkhir($tugas2, $uts2, $uas2);
+            if ($i === 1) {
+                $nama = 'Andi Prasetyo';
+            } elseif ($i <= 10) {
+                $nama = $namaDepan[$index].' '.fake()->lastName();
+            } else {
+                $nama = fake()->name();
+            }
 
-            Nilai::create([
-                'siswa_id' => $siswa->id,
-                'guru_id' => $gurus[1]->id,
-                'mata_pelajaran' => 'Bahasa Indonesia',
-                'nilai_tugas' => $tugas2,
-                'nilai_uts' => $uts2,
-                'nilai_uas' => $uas2,
-                'nilai_akhir' => $na2,
-                'status' => NilaiHelper::tentukanStatusKelulusan($na2),
-            ]);
+            $siswaRecords[] = [
+                'user_id' => $userId,
+                'nis' => 'NIS-'.str_pad((string) $i, 5, '0', STR_PAD_LEFT),
+                'nama' => $nama,
+                'kelas' => $kelasList[$index % count($kelasList)],
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
 
-            $tugas3 = min(60 + ($index * 3), 100);
-            $uts3 = min(65 + ($index * 3), 100);
-            $uas3 = max(min(60 + ($index * 3), 100), 40);
-            $na3 = NilaiHelper::hitungNilaiAkhir($tugas3, $uts3, $uas3);
+        Siswa::insert($siswaRecords);
 
-            Nilai::create([
-                'siswa_id' => $siswa->id,
-                'guru_id' => $gurus[2]->id,
-                'mata_pelajaran' => 'Bahasa Inggris',
-                'nilai_tugas' => $tugas3,
-                'nilai_uts' => $uts3,
-                'nilai_uas' => $uas3,
-                'nilai_akhir' => $na3,
-                'status' => NilaiHelper::tentukanStatusKelulusan($na3),
-            ]);
+        // Ambil ID siswa yang baru dibuat
+        $siswaIds = Siswa::orderBy('id')
+            ->pluck('id')
+            ->toArray();
+
+        // ============================================================
+        // NILAI — setiap siswa mendapat nilai dari 6 guru
+        // Total: 300 × 6 = 1.800 record
+        // Karena WithoutModelEvents aktif, hitung nilai_akhir & status
+        // secara eksplisit menggunakan NilaiHelper.
+        // ============================================================
+        $nilaiRecords = [];
+        $mataPelajaranPerGuru = array_column($guruData, 'mata_pelajaran');
+
+        foreach ($siswaIds as $siswaIndex => $siswaId) {
+            foreach ($guruIds as $guruIndex => $guruId) {
+                // Variasi nilai berdasarkan indeks siswa dan guru agar data realistis
+                $base = 50 + (($siswaIndex + $guruIndex * 3) % 45);
+
+                $tugas = min($base + 5, 100);
+                $uts = min($base + 10, 100);
+                $uas = max(min($base, 100), 40);
+
+                $na = NilaiHelper::hitungNilaiAkhir($tugas, $uts, $uas);
+
+                $nilaiRecords[] = [
+                    'siswa_id' => $siswaId,
+                    'guru_id' => $guruId,
+                    'mata_pelajaran' => $mataPelajaranPerGuru[$guruIndex],
+                    'nilai_tugas' => $tugas,
+                    'nilai_uts' => $uts,
+                    'nilai_uas' => $uas,
+                    'nilai_akhir' => $na,
+                    'status' => NilaiHelper::tentukanStatusKelulusan($na),
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+        }
+
+        // Insert nilai dalam batch untuk performa
+        foreach (array_chunk($nilaiRecords, 500) as $chunk) {
+            Nilai::insert($chunk);
         }
     }
 }

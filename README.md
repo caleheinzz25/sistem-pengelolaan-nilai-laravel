@@ -80,26 +80,82 @@ Aplikasi akan berjalan di:
 
 ---
 
+## 📚 Dokumentasi API (Scribe)
+
+API dokumentasi dibuat menggunakan **Scribe**. Setelah menjalankan aplikasi, buka:
+
+```
+http://localhost:8000/docs
+```
+
+Untuk meregenerasi dokumentasi setelah perubahan route/controller:
+
+```bash
+php artisan scribe:generate
+```
+
+### Endpoint API
+
+| Endpoint | Method | Akses | Keterangan |
+|----------|--------|-------|------------|
+| `/api/login` | POST | Public | Login |
+| `/api/logout` | POST | Auth | Logout |
+| `/api/user` | GET | Auth | Data user login |
+| `/api/admin/dashboard` | GET | Admin | Statistik admin |
+| `/api/admin/siswa` | GET/POST | Admin | Daftar/tambah siswa |
+| `/api/admin/siswa/{siswa}` | GET/PUT/DELETE | Admin | Detail/update/hapus siswa |
+| `/api/admin/guru` | GET/POST | Admin | Daftar/tambah guru |
+| `/api/admin/guru/{guru}` | GET/PUT/DELETE | Admin | Detail/update/hapus guru |
+| `/api/admin/nilai` | GET/POST | Admin | Daftar/tambah nilai |
+| `/api/admin/nilai/{nilai}` | GET/PUT/DELETE | Admin | Detail/update/hapus nilai |
+| `/api/admin/laporan` | GET | Admin | Laporan dengan filter |
+| `/api/admin/laporan/{siswa}` | GET | Admin | Detail laporan siswa |
+| `/api/guru/dashboard` | GET | Guru | Dashboard guru |
+| `/api/guru/rekap` | GET | Guru | Rekap nilai |
+| `/api/guru/input-nilai` | POST | Guru | Input nilai siswa |
+| `/api/siswa/dashboard` | GET | Siswa | Nilai dan status kelulusan |
+
+---
+
 ## 👤 Akun Demo
 
 Semua akun demo menggunakan password: **`password`**
 
-| Peran | Email |
-|-------|-------|
-| Admin | `admin@sekolah.test` |
-| Guru | `budisantoso@sekolah.test` |
-| Guru | `anirahmawati@sekolah.test` |
-| Guru | `dedikurniawan@sekolah.test` |
-| Siswa | `andi@siswa.test` |
-| Siswa | `bunga@siswa.test` |
-| Siswa | `candra@siswa.test` |
-| Siswa | `dewi@siswa.test` |
-| Siswa | `eko@siswa.test` |
-| Siswa | `fitri@siswa.test` |
-| Siswa | `gilang@siswa.test` |
-| Siswa | `hana@siswa.test` |
-| Siswa | `irfan@siswa.test` |
-| Siswa | `jasmine@siswa.test` |
+### Admin
+
+| Email |
+|-------|
+| `admin@sekolah.test` |
+
+### Guru (6 akun)
+
+| Email | Mata Pelajaran |
+|-------|----------------|
+| `budisantoso@sekolah.test` | Matematika |
+| `anirahmawati@sekolah.test` | Bahasa Indonesia |
+| `dedikurniawan@sekolah.test` | Bahasa Inggris |
+| `sitiaminah@sekolah.test` | Fisika |
+| `ahmadfauzi@sekolah.test` | Kimia |
+| `rinawulandari@sekolah.test` | Biologi |
+
+### Siswa (300 akun)
+
+Akun demo utama:
+
+| Email |
+|-------|
+| `andi@siswa.test` |
+
+Siswa lainnya menggunakan email berpola:
+
+```
+siswa001@siswa.test
+siswa002@siswa.test
+...
+siswa300@siswa.test
+```
+
+Akun `andi@siswa.test` memiliki NIS `NIS-00001`. Siswa ke-i memiliki NIS `NIS-#####` (zero-padded 5 digit).
 
 ---
 

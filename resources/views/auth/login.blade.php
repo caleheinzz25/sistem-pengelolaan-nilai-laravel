@@ -58,6 +58,11 @@
                 <ul class="text-xs text-gray-600 space-y-1">
                     <li><strong>Admin:</strong> admin@sekolah.test / password</li>
                     <li><strong>Guru:</strong> budisantoso@sekolah.test / password</li>
+                    <li><strong>Guru:</strong> anirahmawati@sekolah.test / password</li>
+                    <li><strong>Guru:</strong> dedikurniawan@sekolah.test / password</li>
+                    <li><strong>Guru:</strong> sitiaminah@sekolah.test / password</li>
+                    <li><strong>Guru:</strong> ahmadfauzi@sekolah.test / password</li>
+                    <li><strong>Guru:</strong> rinawulandari@sekolah.test / password</li>
                     <li><strong>Siswa:</strong> andi@siswa.test / password</li>
                 </ul>
             </div>
