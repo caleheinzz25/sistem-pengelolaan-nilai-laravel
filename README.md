@@ -1,58 +1,226 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sistem Pengelolaan Nilai Siswa
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi web berbasis **Laravel 13** untuk mengelola nilai siswa. Dibangun sebagai bagian dari sertifikasi **LSP Programmer Skema**.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🎯 Fitur Utama
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Autentikasi berbasis peran** (Admin, Guru, Siswa)
+- **CRUD lengkap** untuk data Siswa, Guru, dan Nilai oleh Admin
+- **Input nilai** oleh Guru dengan perhitungan otomatis
+- **Perhitungan nilai akhir** menggunakan rumus:
+  ```
+  Nilai Akhir = (30% × Tugas) + (30% × UTS) + (40% × UAS)
+  ```
+- **Status kelulusan** otomatis: ≥ 70 = Lulus, < 70 = Tidak Lulus
+- **Laporan nilai** dengan filter kelas dan status
+- **Tampilan cetak** laporan
+- **Sidebar navigation** yang responsif
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 🛠️ Teknologi
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+| Komponen | Versi |
+|----------|-------|
+| PHP | 8.5 |
+| Laravel Framework | 13.x |
+| Tailwind CSS | 4.x (via CDN) |
+| Database | SQLite |
+| Testing | Pest 4 |
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## 🚀 Instalasi
 
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### 1. Clone repository dan install dependency
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+cd sistem-pengelolaan-nilai-laravel
+composer install
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Konfigurasi environment
 
-## Contributing
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Pastikan konfigurasi database di `.env` menggunakan SQLite:
 
-## Code of Conduct
+```env
+DB_CONNECTION=sqlite
+# DB_DATABASE= absolute path ke database/database.sqlite
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 3. Buat file database
 
-## Security Vulnerabilities
+```bash
+touch database/database.sqlite
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 4. Jalankan migrasi dan seeder
 
-## License
+```bash
+php artisan migrate:fresh --seed
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 5. Jalankan aplikasi
+
+```bash
+composer run dev
+```
+
+Aplikasi akan berjalan di:
+
+- Aplikasi: `http://127.0.0.1:8000`
+- Vite dev server: `http://localhost:5173`
+
+---
+
+## 👤 Akun Demo
+
+Semua akun demo menggunakan password: **`password`**
+
+| Peran | Email |
+|-------|-------|
+| Admin | `admin@sekolah.test` |
+| Guru | `budisantoso@sekolah.test` |
+| Guru | `anirahmawati@sekolah.test` |
+| Guru | `dedikurniawan@sekolah.test` |
+| Siswa | `andi@siswa.test` |
+| Siswa | `bunga@siswa.test` |
+| Siswa | `candra@siswa.test` |
+| Siswa | `dewi@siswa.test` |
+| Siswa | `eko@siswa.test` |
+| Siswa | `fitri@siswa.test` |
+| Siswa | `gilang@siswa.test` |
+| Siswa | `hana@siswa.test` |
+| Siswa | `irfan@siswa.test` |
+| Siswa | `jasmine@siswa.test` |
+
+---
+
+## 📂 Struktur Fitur
+
+| Role | Akses |
+|------|-------|
+| **Admin** | Dashboard, Kelola Siswa, Kelola Guru, Kelola Nilai, Laporan |
+| **Guru** | Dashboard, Rekap Nilai, Input Nilai |
+| **Siswa** | Dashboard Nilai Saya, Status Kelulusan |
+
+---
+
+## 🧪 Testing
+
+Aplikasi ini dilengkapi dengan **80 test** menggunakan Pest:
+
+```bash
+# Jalankan semua test
+php artisan test --compact
+
+# Jalankan test tertentu
+php artisan test --compact --filter=AuthTest
+```
+
+Hasil terakhir:
+
+```text
+80 tests passed, 160 assertions
+```
+
+---
+
+## 🧮 Paradigma Pemrograman
+
+Proyek ini menggabungkan dua paradigma pemrograman:
+
+### 1. Pemrograman Terstruktur (Structured Programming)
+
+Implementasi pada `app/Helpers/NilaiHelper.php`:
+
+- `validasiNilai()` — validasi rentang nilai 0–100
+- `hitungNilaiAkhir()` — perhitungan nilai akhir berdasarkan bobot
+- `tentukanStatusKelulusan()` — menentukan lulus/tidak lulus
+- `generateLaporan()` — membuat statistik laporan
+
+### 2. Pemrograman Berorientasi Objek (OOP)
+
+Implementasi pada model-model Eloquent:
+
+- `User` — autentikasi dan relasi peran
+- `Siswa` — data siswa dan laporan nilai pribadi
+- `Guru` — data guru dan input nilai
+- `Nilai` — data nilai dengan event `saving` untuk perhitungan otomatis
+
+Model-model OOP memanggil fungsi-fungsi terstruktur dari `NilaiHelper`.
+
+---
+
+## 📁 Struktur File Penting
+
+```
+app/
+├── Helpers/
+│   └── NilaiHelper.php           # Fungsi terstruktur
+├── Http/
+│   ├── Controllers/
+│   │   ├── AdminController.php   # CRUD admin
+│   │   ├── Auth/
+│   │   │   └── LoginController.php
+│   │   ├── GuruController.php    # Fitur guru
+│   │   ├── SiswaController.php   # Fitur siswa
+│   │   └── LaporanController.php # Laporan
+│   └── Middleware/
+│       └── RoleMiddleware.php    # Middleware role-based
+├── Models/
+│   ├── User.php
+│   ├── Siswa.php
+│   ├── Guru.php
+│   └── Nilai.php
+
+database/seeders/
+└── DatabaseSeeder.php            # Seeder akun demo
+
+resources/views/
+├── layouts/app.blade.php         # Layout sidebar
+├── auth/login.blade.php
+├── admin/                        # View admin
+├── guru/                         # View guru
+├── siswa/                        # View siswa
+└── laporan/                      # View laporan
+
+tests/
+├── Feature/
+│   ├── AuthTest.php
+│   ├── AdminTest.php
+│   ├── GuruTest.php
+│   ├── SiswaTest.php
+│   ├── LaporanTest.php
+│   └── ModelsTest.php
+└── Unit/
+    └── NilaiHelperTest.php
+```
+
+---
+
+## 📝 Dokumentasi Lengkap
+
+Untuk dokumentasi teknis lengkap mencakup analisis sistem, desain database, diagram kelas, dan penjelasan pengujian, lihat file:
+
+📄 [`DOKUMENTASI_SISTEM.md`](DOKUMENTASI_SISTEM.md)
+
+---
+
+## ⚠️ Catatan Penting
+
+- Aplikasi menggunakan **Tailwind CSS via CDN**, bukan Vite build. Jika menjalankan `npm run dev`, Vite hanya sebagai development server, styling tetap dihandle CDN.
+- Pastikan tidak ada file `public/hot` yang tertinggal jika beralih dari Vite ke CDN. Jika UI tampil putih, hapus dengan: `rm -f public/hot && rm -rf public/build`
+
+---
+
+## 📜 Lisensi
+
+Proyek ini dibuat untuk keperluan pembelajaran dan sertifikasi LSP.
